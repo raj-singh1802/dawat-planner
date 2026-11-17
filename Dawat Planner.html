@@ -1,0 +1,311 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Dawat Planner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: one narrow column, mobile first. Setup card, then the generated order plan below it. */
+:root{
+  --bg:#F4F5F7; --surface:#FFFFFF; --fg:#14213D; --muted:#5B6577; --line:#E1E4EA;
+  --accent:#E8590C; --accent-ink:#FFFFFF; --soft:#EEF0F4;
+  --good:#1B7F55; --good-bg:#E3F4EC; --bad:#B3261E; --bad-bg:#FBE9E7;
+  --veg:#1B7F55; --nv:#A63D2F; --jain:#8A6A00; --vegan:#0F7C8C;
+  --font-h:'Space Grotesk',system-ui,sans-serif; --font-b:'Inter',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1320; --surface:#171E2E; --fg:#EEF1F6; --muted:#9BA6B9; --line:#2A3348;
+    --accent:#FF8A3D; --accent-ink:#1A1206; --soft:#202941;
+    --good:#4FD1A0; --good-bg:#12302A; --bad:#FF8F85; --bad-bg:#3A1A18;
+    --veg:#4FD1A0; --nv:#FF9A8B; --jain:#E8C14A; --vegan:#5CCBDB; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1320; --surface:#171E2E; --fg:#EEF1F6; --muted:#9BA6B9; --line:#2A3348;
+  --accent:#FF8A3D; --accent-ink:#1A1206; --soft:#202941;
+  --good:#4FD1A0; --good-bg:#12302A; --bad:#FF8F85; --bad-bg:#3A1A18;
+  --veg:#4FD1A0; --nv:#FF9A8B; --jain:#E8C14A; --vegan:#5CCBDB; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-b);font-size:15px;line-height:1.5;
+  padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2{font-family:var(--font-h);margin:0;text-wrap:balance}
+h1{font-size:30px;line-height:1.1;letter-spacing:-.01em}
+h2{font-size:18px}
+p{margin:0}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.lede{color:var(--muted);margin-top:6px;max-width:52ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px}
+label,.lbl{font-size:13px;font-weight:600;color:var(--muted)}
+input[type=text]{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.field{display:flex;flex-direction:column;gap:6px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--soft);padding:4px;border-radius:10px}
+.seg button{border:0;background:transparent;padding:8px 10px;border-radius:7px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--surface);color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.budget-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.budget-row output{font-family:var(--font-h);font-weight:700;font-size:20px;font-variant-numeric:tabular-nums}
+.grp{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding-block:10px;border-top:1px solid var(--line)}
+.grp:first-of-type{border-top:0}
+.grp b{display:block;font-weight:600}
+.grp small{color:var(--muted);font-size:13px}
+.dot{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:22px;padding:0 6px;border-radius:6px;font-size:11px;font-weight:700;border:1.5px solid currentColor;flex:none}
+.dot.veg{color:var(--veg)} .dot.nonveg{color:var(--nv)} .dot.jain{color:var(--jain)} .dot.vegan{color:var(--vegan)}
+.step{display:flex;align-items:center;gap:6px}
+.step button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--bg);font-size:18px;line-height:1}
+.step output{min-width:28px;text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
+.total-line{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:12px;font-weight:600}
+.rsvp{background:var(--soft);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.rsvp .chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
+.chip[aria-pressed=true]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn{border:0;background:var(--accent);color:var(--accent-ink);font-weight:600;padding:10px 16px;border-radius:9px}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.rsvp-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tile{background:var(--soft);border-radius:10px;padding:10px 12px;min-width:0}
+.tile small{display:block;color:var(--muted);font-size:12px}
+.tile strong{font-family:var(--font-h);font-size:20px;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px}
+.pill.ok{background:var(--good-bg);color:var(--good)} .pill.over{background:var(--bad-bg);color:var(--bad)}
+.cover{display:flex;flex-wrap:wrap;gap:6px}
+.cover span{font-size:12px;background:var(--soft);border-radius:999px;padding:4px 10px}
+.cats{display:flex;flex-wrap:wrap;gap:6px}
+.cat-h{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:10px 0 2px}
+.line{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:start;padding-block:10px;border-top:1px solid var(--line)}
+.line .nm{font-weight:600}
+.line .sub{font-size:13px;color:var(--muted)}
+.line .amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.line .amt small{display:block;color:var(--muted);font-weight:400;font-size:12px}
+.msg{font-size:14px;background:var(--soft);border-radius:10px;padding:10px 12px}
+.empty{color:var(--muted)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.cart{background:var(--soft);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.cart div{display:flex;justify-content:space-between;gap:8px}
+.cart .note{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+@media (prefers-reduced-motion:no-preference){.btn,.chip,.seg button{transition:background .15s,color .15s}}
+@media (max-width:420px){.tiles{grid-template-columns:1fr 1fr}.tiles .tile:last-child{grid-column:1/-1}}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Group orders · sample menu</p>
+    <h1>Dawat Planner</h1>
+    <p class="lede">Say who is coming and what you can spend. It builds one order that every guest can eat.</p>
+  </header>
+
+  <section class="card" aria-labelledby="h-party">
+    <h2 id="h-party">Your party</h2>
+    <div class="field">
+      <label for="evname">Occasion</label>
+      <input type="text" id="evname" value="Riya's housewarming" maxlength="40" autocomplete="off">
+    </div>
+    <div class="field">
+      <span class="lbl" id="lbl-app">How hungry is the crowd?</span>
+      <div class="seg" role="group" aria-labelledby="lbl-app">
+        <button type="button" id="app-light" data-app="light" aria-pressed="false">Light bites</button>
+        <button type="button" id="app-full" data-app="full" aria-pressed="true">Full meal</button>
+      </div>
+    </div>
+    <div class="field">
+      <div class="budget-row"><label for="budget">Budget per head</label><output id="budget-out" for="budget"></output></div>
+      <input type="range" id="budget" min="250" max="900" step="25" value="550">
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="h-guests">
+    <h2 id="h-guests">Who is coming</h2>
+    <div id="groups"></div>
+    <div class="total-line"><span>Total guests</span><span id="guest-total">0</span></div>
+
+    <div class="rsvp">
+      <div>
+        <b>Guest link preview</b>
+        <p class="sub" style="font-size:13px;color:var(--muted)">Guests would open a shared link and pick their diet. Try it here as a guest; the counts above update.</p>
+      </div>
+      <div class="field">
+        <label for="rsvp-name">Guest name</label>
+        <input type="text" id="rsvp-name" maxlength="24" placeholder="e.g. Aarav" autocomplete="off">
+      </div>
+      <div class="chips" id="rsvp-chips" role="group" aria-label="Guest diet"></div>
+      <div class="actions"><button type="button" class="btn" id="rsvp-add">Add RSVP</button></div>
+      <ul class="rsvp-list" id="rsvp-list" aria-live="polite"></ul>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="h-plan">
+    <h2 id="h-plan">Order plan</h2>
+    <div id="plan"></div>
+  </section>
+</div>
+
+<script>
+/*LOGIC*/
+const MENU=[
+{id:'pt',n:'Paneer Tikka Platter',r:'Tandoor Junction',c:'starter',d:'veg',s:4,p:449},
+{id:'hb',n:'Hara Bhara Kebab',r:'Green Leaf Kitchen',c:'starter',d:'veg',s:3,p:329},
+{id:'ct',n:'Chicken Tikka',r:'Tandoor Junction',c:'starter',d:'nonveg',s:4,p:479},
+{id:'fa',n:'Fish Amritsari',r:'Tandoor Junction',c:'starter',d:'nonveg',s:3,p:449},
+{id:'jt',n:'Jain Paneer Tikka',r:'Pure Jain Rasoi',c:'starter',d:'jain',s:4,p:429},
+{id:'tt',n:'Tofu Tikka Skewers',r:'Green Leaf Kitchen',c:'starter',d:'vegan',s:3,p:429},
+{id:'dm',n:'Dal Makhani',r:'Green Leaf Kitchen',c:'main',d:'veg',s:4,p:379},
+{id:'pb',n:'Paneer Butter Masala',r:'Green Leaf Kitchen',c:'main',d:'veg',s:3,p:399},
+{id:'bc',n:'Butter Chicken',r:'Tandoor Junction',c:'main',d:'nonveg',s:3,p:499},
+{id:'rj',n:'Mutton Rogan Josh',r:'Tandoor Junction',c:'main',d:'nonveg',s:3,p:649},
+{id:'jd',n:'Jain Dal Tadka',r:'Pure Jain Rasoi',c:'main',d:'jain',s:4,p:329},
+{id:'cm',n:'Chana Masala',r:'Green Leaf Kitchen',c:'main',d:'vegan',s:4,p:329},
+{id:'nb',n:'Butter Naan Basket (6)',r:'Tandoor Junction',c:'staple',d:'veg',s:3,p:249},
+{id:'vp',n:'Veg Pulao',r:'Green Leaf Kitchen',c:'staple',d:'veg',s:3,p:349},
+{id:'cb',n:'Chicken Dum Biryani',r:'Biryani Bazaar',c:'staple',d:'nonveg',s:3,p:449},
+{id:'jp',n:'Jain Veg Pulao',r:'Pure Jain Rasoi',c:'staple',d:'jain',s:3,p:319},
+{id:'jr',n:'Jeera Rice',r:'Green Leaf Kitchen',c:'staple',d:'vegan',s:4,p:249},
+{id:'gj',n:'Gulab Jamun Box (12)',r:'Mithai Ghar',c:'dessert',d:'veg',s:6,p:299},
+{id:'js',n:'Jain Shrikhand Cups',r:'Pure Jain Rasoi',c:'dessert',d:'jain',s:4,p:279},
+{id:'ck',n:'Coconut Milk Kheer',r:'Green Leaf Kitchen',c:'dessert',d:'vegan',s:4,p:289}
+];
+const CATS=[['starter','Starters'],['main','Mains'],['staple','Breads & rice'],['dessert','Desserts']];
+const GROUPS=[['veg','Vegetarian','V','Veg','No meat, fish or egg'],['nonveg','Non-veg','NV','Non-veg','Eats everything'],['jain','Jain','J','Jain','No onion, garlic or root vegetables'],['vegan','Vegan','VG','Vegan','No dairy or honey']];
+/* portion units per guest, per course */
+const PER={full:{starter:.7,main:1,staple:1,dessert:.8},light:{starter:1,main:.5,staple:.5,dessert:.6}};
+const S={name:"Riya's housewarming",appetite:'full',budget:550,counts:{veg:6,nonveg:5,jain:2,vegan:1},off:{starter:false,main:false,staple:false,dessert:false},rsvps:[],rsvpDiet:'veg',msg:'',cart:false};
+function guestCount(){return GROUPS.reduce((a,g)=>a+S.counts[g[0]],0)}
+function buildPlan(){
+  const demand={},who={},groupDishes={};
+  GROUPS.forEach(([g])=>{
+    const n=S.counts[g]; if(!n) return;
+    groupDishes[g]=new Set();
+    CATS.forEach(([c])=>{
+      if(S.off[c]) return;
+      let pool=MENU.filter(m=>m.c===c&&m.d===g);
+      if(!pool.length&&g==='nonveg') pool=MENU.filter(m=>m.c===c&&m.d==='veg');
+      const k=Math.min(pool.length,n>=6?2:1); if(!k) return;
+      pool.slice(0,k).forEach(m=>{
+        demand[m.id]=(demand[m.id]||0)+n*PER[S.appetite][c]/k;
+        (who[m.id]=who[m.id]||{})[g]=n;
+        groupDishes[g].add(m.id);
+      });
+    });
+  });
+  const lines=Object.keys(demand).map(id=>{
+    const m=MENU.find(x=>x.id===id);
+    const qty=Math.max(1,Math.ceil(demand[id]/m.s-1e-9));
+    return {m,qty,cost:qty*m.p,who:who[id]};
+  });
+  const total=lines.reduce((a,l)=>a+l.cost,0);
+  return {lines,total,groupDishes};
+}
+function perHead(){const g=guestCount();return g?Math.round(buildPlan().total/g):0}
+function fitToBudget(){
+  const steps=[
+    ()=>{if(S.appetite==='full'){S.appetite='light';return 'switched to light bites'}},
+    ()=>{if(!S.off.dessert){S.off.dessert=true;return 'removed desserts'}},
+    ()=>{if(!S.off.starter){S.off.starter=true;return 'removed starters'}}
+  ];
+  const done=[];
+  for(const st of steps){ if(perHead()<=S.budget) break; const r=st(); if(r) done.push(r); }
+  const ph=perHead();
+  let msg=done.length?('Fitted to budget: '+done.join(', ')+'. Now '+inr(ph)+' per head.'):'Nothing left to trim.';
+  if(ph>S.budget) msg+=' Still '+inr(ph-S.budget)+' over per head. Raise the budget or trim the guest list.';
+  S.msg=msg;
+}
+function inr(n){return '₹'+Math.round(n).toLocaleString('en-IN')}
+/*END*/
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function renderGroups(){
+  $('groups').innerHTML=GROUPS.map(([g,label,tag,,desc])=>(
+    '<div class="grp" data-g="'+g+'"><span class="dot '+g+'" title="'+label+'">'+tag+'</span>'+
+    '<div><b>'+label+'</b><small>'+desc+'</small></div>'+
+    '<div class="step"><button type="button" data-d="-1" aria-label="Fewer '+label+' guests">−</button>'+
+    '<output id="n-'+g+'">'+S.counts[g]+'</output>'+
+    '<button type="button" data-d="1" aria-label="More '+label+' guests">+</button></div></div>'
+  )).join('');
+}
+function renderCounts(){
+  GROUPS.forEach(([g])=>{const o=$('n-'+g); if(o) o.textContent=S.counts[g]});
+  $('guest-total').textContent=guestCount();
+}
+function renderRsvp(){
+  $('rsvp-chips').innerHTML=GROUPS.map(([g,label])=>'<button type="button" class="chip" data-rd="'+g+'" aria-pressed="'+(S.rsvpDiet===g)+'">'+label+'</button>').join('');
+  $('rsvp-list').innerHTML=S.rsvps.slice(0,4).map(r=>'<li>'+esc(r.name)+' joined as '+esc(r.label)+'</li>').join('');
+}
+function renderControls(){
+  $('app-light').setAttribute('aria-pressed',S.appetite==='light');
+  $('app-full').setAttribute('aria-pressed',S.appetite==='full');
+  $('budget').value=S.budget;
+  $('budget-out').textContent=inr(S.budget);
+}
+function renderPlan(){
+  const el=$('plan'), guests=guestCount();
+  if(!guests){el.innerHTML='<p class="empty">Add guests above to see the order plan.</p>';return}
+  const cats='<div class="cats" role="group" aria-label="Courses to include">'+CATS.map(([c,l])=>'<button type="button" class="chip" data-cat="'+c+'" aria-pressed="'+(!S.off[c])+'">'+l+'</button>').join('')+'</div>';
+  const P=buildPlan();
+  if(!P.lines.length){el.innerHTML=cats+'<p class="empty" style="margin-top:12px">Turn on at least one course.</p>';return}
+  const ph=Math.round(P.total/guests), over=ph>S.budget;
+  const kitchens=new Set(P.lines.map(l=>l.m.r)).size;
+  const tiles='<div class="tiles"><div class="tile"><small>Order total</small><strong>'+inr(P.total)+'</strong></div>'+
+    '<div class="tile"><small>Per head</small><strong>'+inr(ph)+'</strong> <span class="pill '+(over?'over':'ok')+'">'+(over?inr(ph-S.budget)+' over':'In budget')+'</span></div>'+
+    '<div class="tile"><small>Kitchens</small><strong>'+kitchens+'</strong></div></div>';
+  const cover='<div class="cover">'+GROUPS.filter(([g])=>S.counts[g]>0).map(([g,,,short])=>'<span>'+short+' · '+S.counts[g]+' guests · '+P.groupDishes[g].size+' dishes</span>').join('')+'</div>';
+  let rows='';
+  CATS.forEach(([c,l])=>{
+    const ls=P.lines.filter(x=>x.m.c===c); if(!ls.length) return;
+    rows+='<div class="cat-h">'+l+'</div>'+ls.map(x=>{
+      const g=GROUPS.find(q=>q[0]===x.m.d);
+      const forTxt=GROUPS.filter(q=>x.who[q[0]]).map(q=>q[3]+' '+x.who[q[0]]).join(' · ');
+      return '<div class="line"><span class="dot '+x.m.d+'" title="'+g[1]+'">'+g[2]+'</span>'+
+        '<div><div class="nm">'+esc(x.m.n)+'</div><div class="sub">'+esc(x.m.r)+' · serves '+x.m.s+' · for '+forTxt+'</div></div>'+
+        '<div class="amt">'+inr(x.cost)+'<small>'+x.qty+' × '+inr(x.m.p)+'</small></div></div>';
+    }).join('');
+  });
+  let cart='';
+  if(S.cart){
+    const by={}; P.lines.forEach(x=>{by[x.m.r]=(by[x.m.r]||0)+x.cost});
+    cart='<div class="cart"><b>Cart split by kitchen</b>'+Object.keys(by).map(k=>'<div><span>'+esc(k)+'</span><span>'+inr(by[k])+'</span></div>').join('')+
+      '<span class="note">Prototype: the real product would fill the cart and let you pick one delivery time. Taxes and delivery fees are added at checkout.</span></div>';
+  }
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:12px">'+
+    '<p class="sub" style="color:var(--muted)">For '+esc(S.name||'your party')+' · '+guests+' guests</p>'+
+    tiles+cover+cats+
+    (S.msg?'<p class="msg" role="status">'+esc(S.msg)+'</p>':'')+
+    '<div>'+rows+'</div>'+
+    '<div class="actions">'+(over?'<button type="button" class="btn" data-act="fit">Fit to budget</button>':'')+
+    '<button type="button" class="btn'+(over?' ghost':'')+'" data-act="cart">'+(S.cart?'Hide cart':'Review cart')+'</button></div>'+cart+'</div>';
+}
+function renderAll(){renderControls();renderCounts();renderRsvp();renderPlan()}
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button'); if(!t) return;
+  if(t.dataset.d){
+    const g=t.closest('.grp').dataset.g;
+    S.counts[g]=Math.max(0,Math.min(60,S.counts[g]+Number(t.dataset.d)));
+    S.msg=''; renderCounts(); renderPlan();
+  } else if(t.dataset.app){
+    S.appetite=t.dataset.app; S.msg=''; renderControls(); renderPlan();
+  } else if(t.dataset.cat){
+    S.off[t.dataset.cat]=!S.off[t.dataset.cat]; S.msg=''; renderPlan();
+  } else if(t.dataset.rd){
+    S.rsvpDiet=t.dataset.rd; renderRsvp();
+  } else if(t.id==='rsvp-add'){
+    const inp=$('rsvp-name'), g=GROUPS.find(q=>q[0]===S.rsvpDiet);
+    S.counts[g[0]]=Math.min(60,S.counts[g[0]]+1);
+    S.rsvps.unshift({name:inp.value.trim()||'A guest',label:g[1]});
+    inp.value=''; S.msg=''; renderCounts(); renderRsvp(); renderPlan();
+  } else if(t.dataset.act==='fit'){
+    fitToBudget(); renderControls(); renderPlan();
+  } else if(t.dataset.act==='cart'){
+    S.cart=!S.cart; renderPlan();
+  }
+});
+$('budget').addEventListener('input',e=>{S.budget=Number(e.target.value);S.msg='';$('budget-out').textContent=inr(S.budget);renderPlan()});
+$('evname').addEventListener('input',e=>{S.name=e.target.value;renderPlan()});
+
+renderGroups();
+renderAll();
+</script>
+
+</body></html>
